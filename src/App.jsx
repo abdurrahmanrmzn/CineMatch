@@ -89,7 +89,14 @@ function App() {
         </div>
 
         <div className="movie-grid">
-          {loading && <p>Loading movies…</p>}
+          {loading &&
+            Array.from({ length: 5 }, (_, index) => (
+              <div className="movie-skeleton" key={index} aria-hidden="true">
+                <div className="skeleton-poster" />
+                <div className="skeleton-line" />
+                <div className="skeleton-line skeleton-line-short" />
+              </div>
+            ))}
 
           {error && (
             <p role="alert">Could not load movies: {error}</p>
