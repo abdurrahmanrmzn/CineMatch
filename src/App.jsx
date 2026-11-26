@@ -106,9 +106,10 @@ function HomePage() {
 
           {!loading &&
             !error &&
-            movies.map((movie) => (
+            movies.slice(0, 5).map((movie) => (
               <MovieCard key={movie.id} movie={movie} />
-            ))}
+            ))
+            }
 
           {!loading && !error && movies.length === 0 && (
             <p>No movies found.</p>
