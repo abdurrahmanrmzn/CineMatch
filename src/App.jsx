@@ -5,6 +5,31 @@ import heroImage from "./assets/hero.png";
 import useNowPlayingMovies from "./hooks/useNowPlayingMovies";
 import useMovieDetails from "./hooks/useMovieDetails";
 
+function SiteHeader() {
+  return (
+    <header className="site-header">
+      <Link className="brand" to="/">
+        <span className="brand-icon">▶</span>
+        <span>
+          Cine<span className="brand-accent">Match</span>
+        </span>
+      </Link>
+
+      <nav className="main-nav" aria-label="Main navigation">
+        <Link className="active" to="/">
+          Home
+        </Link>
+        <Link to="/#movies">Movies</Link>
+        <Link to="/#bookings">My Bookings</Link>
+      </nav>
+
+      <button className="login-button" type="button">
+        Login
+      </button>
+    </header>
+  );
+}
+
 function MovieCard({ movie }) {
   return (
    <Link to={`/movies/${movie.id}`} className="movie-card">
@@ -37,26 +62,7 @@ function HomePage() {
 
   return (
     <main className="home-page">
-      <header className="site-header">
-        <a className="brand" href="/">
-          <span className="brand-icon">▶</span>
-          <span>
-            Cine<span className="brand-accent">Match</span>
-          </span>
-        </a>
-
-        <nav className="main-nav" aria-label="Main navigation">
-          <a className="active" href="/">
-            Home
-          </a>
-          <a href="#movies">Movies</a>
-          <a href="#bookings">My Bookings</a>
-        </nav>
-
-        <button className="login-button" type="button">
-          Login
-        </button>
-      </header>
+      <SiteHeader />
 
       <section
         className="hero"
@@ -136,33 +142,37 @@ function MovieDetailsPage() {
   if (loading) {
     return (
       <main className="home-page">
+        <SiteHeader />
         <p className="details-message">Loading movie details…</p>
       </main>
     );
   }
 
-  if (error) {
-    return (
-      <main className="home-page">
-        <p className="details-message" role="alert">
-          Could not load movie details: {error}
-        </p>
-        <Link className="back-link" to="/">← Back to movies</Link>
-      </main>
-    );
-  }
+ if (error) {
+  return (
+    <main className="home-page">
+      <SiteHeader />
+      <p className="details-message" role="alert">
+        Could not load movie details: {error}
+      </p>
+      <Link className="back-link" to="/">← Back to movies</Link>
+    </main>
+  );
+}
 
-  if (!movie) {
-    return (
-      <main className="home-page">
-        <p className="details-message">Movie not found.</p>
-        <Link className="back-link" to="/">← Back to movies</Link>
-      </main>
-    );
-  }
+if (!movie) {
+  return (
+    <main className="home-page">
+      <SiteHeader />
+      <p className="details-message">Movie not found.</p>
+      <Link className="back-link" to="/">← Back to movies</Link>
+    </main>
+  );
+}
 
   return (
     <main className="home-page">
+      <SiteHeader />
       <section className="movie-details">
         <div className="details-poster">
           {movie.poster_path ? (
