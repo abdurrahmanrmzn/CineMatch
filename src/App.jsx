@@ -1,5 +1,6 @@
 import "./App.css";
 import { Link, Route, Routes, useParams } from "react-router-dom";
+import { useState } from "react";
 import heroImage from "./assets/hero.png";
 import useNowPlayingMovies from "./hooks/useNowPlayingMovies";
 import useMovieDetails from "./hooks/useMovieDetails";
@@ -31,6 +32,8 @@ function MovieCard({ movie }) {
 
 function HomePage() {
   const { movies, loading, error } = useNowPlayingMovies();
+  const [showAllMovies, setShowAllMovies] = useState(false);
+  const visibleMovies = showAllMovies ? movies : movies.slice(0, 5);
 
   return (
     <main className="home-page">
@@ -84,10 +87,6 @@ function HomePage() {
             <p className="eyebrow">NOW SHOWING</p>
             <h2>Find your next favourite movie.</h2>
           </div>
-
-          <a href="#movies" className="view-all-link">
-            View all <span aria-hidden="true">→</span>
-          </a>
         </div>
 
         <div className="movie-grid">
@@ -106,7 +105,7 @@ function HomePage() {
 
           {!loading &&
             !error &&
-            movies.slice(0, 5).map((movie) => (
+            visibleMovies.map((movie) => (
               <MovieCard key={movie.id} movie={movie} />
             ))
             }
@@ -115,6 +114,16 @@ function HomePage() {
             <p>No movies found.</p>
           )}
         </div>
+
+        {!loading && !error && movies.length > 5 && (
+          <button
+            className="movies-toggle"
+            type="button"
+            onClick={() => setShowAllMovies((current) => !current)}
+          >
+            {showAllMovies ? "View less ↑" : "View all movies ↓"}
+          </button>
+        )}
       </section>
     </main>
   );

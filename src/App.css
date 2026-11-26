@@ -455,3 +455,37 @@
     width: min(100%, 300px);
   }
 }
+
+button.view-all-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.movies-toggle {
+  display: block;
+  margin: 28px auto 0;
+  padding: 12px 24px;
+  border: 1px solid #ef233c;
+  border-radius: 999px;
+  background: #ef233c;
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(239, 35, 60, 0.2);
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.movies-toggle:hover {
+  background: #d71932;
+  transform: translateY(-2px);
+}
+
+.movies-toggle:focus-visible {
+  outline: 2px solid #ff5367;
+  outline-offset: 4px;
+}

@@ -52,7 +52,7 @@ export default function useNowPlayingMovies() {
 
         if (isActive) {
           setMovies(
-            data.results.map((movie) => ({
+            data.results.slice(0, 8).map((movie) => ({
               id: movie.id,
               title: movie.title,
               rating: movie.vote_average.toFixed(1),
