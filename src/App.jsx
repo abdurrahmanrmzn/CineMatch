@@ -219,11 +219,258 @@ if (!movie) {
   );
 }
 
+function BookingPage() {
+  const { movieId } = useParams();
+  const { movie, loading, error } = useMovieDetails(movieId);
+
+  const [selectedShowtime, setSelectedShowtime] = useState("");
+  const [selectedSeats, setSelectedSeats] = useState([]);
+
+  const seatRows = ["A", "B", "C", "D", "E"];
+  const seatsPerRow = 8;
+
+  // Mock occupied seats for the demo
+  const occupiedSeats = ["A3", "B6", "D2", "D7"];
+
+  const getSeatPrice = (row) => {
+    if (row === "A" || row === "B") return 1200;
+    if (row === "C" || row === "D") return 900;
+    return 700;
+  };
+
+  const toggleSeat = (seatId) => {
+    setSelectedSeats((currentSeats) =>
+      currentSeats.includes(seatId)
+        ? currentSeats.filter((seat) => seat !== seatId)
+        : [...currentSeats, seatId]
+    );
+  };
+
+  const totalPrice = selectedSeats.reduce((total, seatId) => {
+    return total + getSeatPrice(seatId[0]);
+  }, 0);
+
+  const showtimes = ["10:30 AM", "2:30 PM", "6:30 PM"];
+
+  if (loading) {
+    return (
+      <>
+        <SiteHeader />
+        <main className="booking-page">
+          <p className="booking-status">Loading movie details...</p>
+        </main>
+      </>
+    );
+  }
+
+  if (error || !movie) {
+    return (
+      <>
+        <SiteHeader />
+        <main className="booking-page">
+          <p className="booking-status">
+            We couldn’t load this movie. Please return to the movie list and try again.
+          </p>
+        </main>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <SiteHeader />
+
+      <main className="booking-page">
+        <section className="booking-intro">
+          <p className="booking-eyebrow">YOUR MOVIE NIGHT STARTS HERE</p>
+          <h1>Book your seats</h1>
+          <p className="booking-subtitle">
+            Choose a showtime at CineMatch Cinema. Your seat selection comes next.
+          </p>
+        </section>
+
+        <section className="booking-layout">
+          <div className="booking-movie-card">
+            {movie.poster_path ? (
+              <img
+                className="booking-poster"
+                src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
+                alt={`${movie.title} poster`}
+              />
+            ) : (
+              <div className="booking-poster booking-poster-placeholder">
+                Poster unavailable
+              </div>
+            )}
+
+            <div className="booking-movie-info">
+              <p className="booking-card-label">NOW BOOKING</p>
+              <h2>{movie.title}</h2>
+              <p>
+                {movie.release_date
+                  ? new Date(movie.release_date).getFullYear()
+                  : "Release year unavailable"}
+                {movie.runtime ? ` · ${movie.runtime} min` : ""}
+              </p>
+            </div>
+          </div>
+
+          <div className="booking-options">
+            <section className="booking-venue">
+              <div className="booking-venue-icon" aria-hidden="true">
+                <span>CM</span>
+              </div>
+
+              <div>
+                <p className="booking-card-label">YOUR CINEMA</p>
+                <h2>CineMatch Cinema</h2>
+                <p>One cinema. Your next movie night.</p>
+              </div>
+            </section>
+
+            <section className="booking-showtimes">
+              {selectedShowtime && (
+                <section className="booking-seats">
+                  <div className="booking-section-heading">
+                    <div>
+                      <p className="booking-card-label">STEP 02</p>
+                      <h2>Choose your seats</h2>
+                    </div>
+                    <span className="booking-step">
+                      {selectedSeats.length} selected
+                    </span>
+                  </div>
+
+                  <div className="booking-screen">
+                    SCREEN
+                  </div>
+
+                  <div className="booking-seat-map">
+                    {seatRows.map((row) => (
+                      <div className="booking-seat-row" key={row}>
+                        <span className="booking-row-label">{row}</span>
+
+                        <div className="booking-seat-row-buttons">
+                          {Array.from({ length: seatsPerRow }, (_, index) => {
+                            const seatNumber = index + 1;
+                            const seatId = `${row}${seatNumber}`;
+                            const isOccupied = occupiedSeats.includes(seatId);
+                            const isSelected = selectedSeats.includes(seatId);
+
+                            return (
+                              <button
+                                key={seatId}
+                                type="button"
+                                className={`booking-seat ${
+                                  isOccupied ? "occupied" : ""
+                                } ${isSelected ? "selected" : ""}`}
+                                disabled={isOccupied}
+                                aria-label={`Seat ${seatId}${
+                                  isOccupied ? ", occupied" : ""
+                                }`}
+                                aria-pressed={isSelected}
+                                onClick={() => toggleSeat(seatId)}
+                              >
+                                {seatNumber}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <span className="booking-row-label">{row}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="booking-seat-legend">
+                    <span><i className="legend-seat available" /> Available</span>
+                    <span><i className="legend-seat selected" /> Selected</span>
+                    <span><i className="legend-seat occupied" /> Occupied</span>
+                  </div>
+
+                  <div className="booking-total-panel">
+                    <div>
+                      <p className="booking-card-label">YOUR SELECTION</p>
+                      <strong>
+                        {selectedSeats.length === 0
+                          ? "No seats selected"
+                          : selectedSeats.join(", ")}
+                      </strong>
+                      <p>
+                        {selectedSeats.length}{" "}
+                        {selectedSeats.length === 1 ? "ticket" : "tickets"}
+                      </p>
+                    </div>
+
+                    <div className="booking-total-price">
+                      <span>Total</span>
+                      <strong>LKR {totalPrice.toLocaleString("en-LK")}</strong>
+                    </div>
+                  </div>
+                </section>
+              )}
+              <div className="booking-section-heading">
+                <div>
+                  <p className="booking-card-label">PICK YOUR SESSION</p>
+                  <h2>Choose a showtime</h2>
+                </div>
+                <span className="booking-step">01 / 02</span>
+              </div>
+
+              <div className="booking-time-options">
+                {showtimes.map((showtime) => (
+                  <button
+                    key={showtime}
+                    type="button"
+                    className={`booking-time-option ${
+                      selectedShowtime === showtime ? "selected" : ""
+                    }`}
+                    aria-pressed={selectedShowtime === showtime}
+                    onClick={() => setSelectedShowtime(showtime)}
+                  >
+                    <span>{showtime}</span>
+                    <small>Standard session</small>
+                  </button>
+                ))}
+              </div>
+
+              <div className="booking-selection-panel" aria-live="polite">
+                {selectedShowtime ? (
+                  <>
+                    <div>
+                      <p className="booking-card-label">YOUR SESSION</p>
+                      <strong>{selectedShowtime}</strong>
+                      <p>{movie.title} · CineMatch Cinema</p>
+                    </div>
+                    <span className="booking-selection-check" aria-hidden="true">
+                      ✓
+                    </span>
+                  </>
+                ) : (
+                  <p>
+                    <span aria-hidden="true">◷</span>
+                    Select a showtime to prepare your seat selection.
+                  </p>
+                )}
+              </div>
+
+              <p className="booking-demo-note">
+                Sample showtimes for the project demo; real cinema schedules are not connected.
+              </p>
+            </section>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+}
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/movies/:movieId" element={<MovieDetailsPage />} />
+      <Route path="/booking/:movieId" element={<BookingPage />} />
     </Routes>
   );
 }
