@@ -20,12 +20,7 @@ function SiteHeader() {
           Home
         </Link>
         <Link to="/#movies">Movies</Link>
-        <Link to="/#bookings">My Bookings</Link>
       </nav>
-
-      <button className="login-button" type="button">
-        Login
-      </button>
     </header>
   );
 }
