@@ -225,6 +225,12 @@ function BookingPage() {
 
   const [selectedShowtime, setSelectedShowtime] = useState("");
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+
+  const [groupSize, setGroupSize] = useState("2");
+  const [seatPreference, setSeatPreference] = useState("best-view");
+  const [seatSuggestion, setSeatSuggestion] = useState([]);
+  const [finderMessage, setFinderMessage] = useState("");
 
   const seatRows = ["A", "B", "C", "D", "E"];
   const seatsPerRow = 8;
@@ -238,11 +244,6 @@ function BookingPage() {
 
   const occupiedSeats = occupiedSeatsByShowtime[selectedShowtime] || [];
 
-  const [groupSize, setGroupSize] = useState("2");
-  const [seatPreference, setSeatPreference] = useState("best-view");
-  const [seatSuggestion, setSeatSuggestion] = useState([]);
-  const [finderMessage, setFinderMessage] = useState("");
-
   const getSeatPrice = (row) => {
     if (row === "A" || row === "B") return 1200;
     if (row === "C" || row === "D") return 900;
@@ -250,6 +251,8 @@ function BookingPage() {
   };
 
   const findRecommendedSeats = () => {
+    setBookingConfirmed(false);
+
     if (!selectedShowtime) {
       setFinderMessage("Choose a showtime first.");
       return;
@@ -259,7 +262,11 @@ function BookingPage() {
     const availableGroups = [];
 
     seatRows.forEach((row, rowIndex) => {
-      for (let start = 1; start <= seatsPerRow - numberOfSeats + 1; start++) {
+      for (
+        let start = 1;
+        start <= seatsPerRow - numberOfSeats + 1;
+        start++
+      ) {
         const group = Array.from(
           { length: numberOfSeats },
           (_, index) => `${row}${start + index}`
@@ -272,11 +279,14 @@ function BookingPage() {
         if (!groupIsAvailable) continue;
 
         const averageSeatNumber =
-          group.reduce((total, seatId) => total + Number(seatId.slice(1)), 0) /
-          group.length;
+          group.reduce(
+            (total, seatId) => total + Number(seatId.slice(1)),
+            0
+          ) / group.length;
 
         const centerDistance = Math.abs(averageSeatNumber - 4.5);
         const rowDistance = Math.abs(rowIndex - 2);
+
         const totalPrice = group.reduce(
           (total, seatId) => total + getSeatPrice(seatId[0]),
           0
@@ -292,7 +302,11 @@ function BookingPage() {
           score = centerDistance;
         }
 
-        availableGroups.push({ seats: group, score, totalPrice });
+        availableGroups.push({
+          seats: group,
+          score,
+          totalPrice,
+        });
       }
     });
 
@@ -316,6 +330,8 @@ function BookingPage() {
   };
 
   const toggleSeat = (seatId) => {
+    setBookingConfirmed(false);
+
     setSelectedSeats((currentSeats) =>
       currentSeats.includes(seatId)
         ? currentSeats.filter((seat) => seat !== seatId)
@@ -346,7 +362,8 @@ function BookingPage() {
         <SiteHeader />
         <main className="booking-page">
           <p className="booking-status">
-            We couldn’t load this movie. Please return to the movie list and try again.
+            We couldn’t load this movie. Please return to the movie list and
+            try again.
           </p>
         </main>
       </>
@@ -362,7 +379,8 @@ function BookingPage() {
           <p className="booking-eyebrow">YOUR MOVIE NIGHT STARTS HERE</p>
           <h1>Book your seats</h1>
           <p className="booking-subtitle">
-            Choose a showtime at CineMatch Cinema. Your seat selection comes next.
+            Choose a showtime at CineMatch Cinema. Your seat selection comes
+            next.
           </p>
         </section>
 
@@ -406,6 +424,66 @@ function BookingPage() {
             </section>
 
             <section className="booking-showtimes">
+              <div className="booking-section-heading">
+                <div>
+                  <p className="booking-card-label">PICK YOUR SESSION</p>
+                  <h2>Choose a showtime</h2>
+                </div>
+                <span className="booking-step">01 / 02</span>
+              </div>
+
+              <div className="booking-time-options">
+                {showtimes.map((showtime) => (
+                  <button
+                    key={showtime}
+                    type="button"
+                    className={`booking-time-option ${
+                      selectedShowtime === showtime ? "selected" : ""
+                    }`}
+                    aria-pressed={selectedShowtime === showtime}
+                    onClick={() => {
+                      setSelectedShowtime(showtime);
+                      setSelectedSeats([]);
+                      setSeatSuggestion([]);
+                      setFinderMessage("");
+                      setBookingConfirmed(false);
+                    }}
+                  >
+                    <span>{showtime}</span>
+                    <small>Standard session</small>
+                  </button>
+                ))}
+              </div>
+
+              <div className="booking-selection-panel" aria-live="polite">
+                {selectedShowtime ? (
+                  <>
+                    <div>
+                      <p className="booking-card-label">YOUR SESSION</p>
+                      <strong>{selectedShowtime}</strong>
+                      <p>{movie.title} · CineMatch Cinema</p>
+                    </div>
+
+                    <span
+                      className="booking-selection-check"
+                      aria-hidden="true"
+                    >
+                      ✓
+                    </span>
+                  </>
+                ) : (
+                  <p>
+                    <span aria-hidden="true">◷</span>
+                    Select a showtime to prepare your seat selection.
+                  </p>
+                )}
+              </div>
+
+              <p className="booking-demo-note">
+                Sample showtimes for the project demo; real cinema schedules
+                are not connected.
+              </p>
+
               {selectedShowtime && (
                 <section className="booking-seats">
                   <div className="booking-section-heading">
@@ -413,14 +491,13 @@ function BookingPage() {
                       <p className="booking-card-label">STEP 02</p>
                       <h2>Choose your seats</h2>
                     </div>
+
                     <span className="booking-step">
                       {selectedSeats.length} selected
                     </span>
                   </div>
 
-                  <div className="booking-screen">
-                    SCREEN
-                  </div>
+                  <div className="booking-screen">SCREEN</div>
 
                   <div className="booking-seat-map">
                     {seatRows.map((row) => (
@@ -428,30 +505,37 @@ function BookingPage() {
                         <span className="booking-row-label">{row}</span>
 
                         <div className="booking-seat-row-buttons">
-                          {Array.from({ length: seatsPerRow }, (_, index) => {
-                            const seatNumber = index + 1;
-                            const seatId = `${row}${seatNumber}`;
-                            const isOccupied = occupiedSeats.includes(seatId);
-                            const isSelected = selectedSeats.includes(seatId);
+                          {Array.from(
+                            { length: seatsPerRow },
+                            (_, index) => {
+                              const seatNumber = index + 1;
+                              const seatId = `${row}${seatNumber}`;
+                              const isOccupied =
+                                occupiedSeats.includes(seatId);
+                              const isSelected =
+                                selectedSeats.includes(seatId);
 
-                            return (
-                              <button
-                                key={seatId}
-                                type="button"
-                                className={`booking-seat ${
-                                  isOccupied ? "occupied" : ""
-                                } ${isSelected ? "selected" : ""}`}
-                                disabled={isOccupied}
-                                aria-label={`Seat ${seatId}${
-                                  isOccupied ? ", occupied" : ""
-                                }`}
-                                aria-pressed={isSelected}
-                                onClick={() => toggleSeat(seatId)}
-                              >
-                                {seatNumber}
-                              </button>
-                            );
-                          })}
+                              return (
+                                <button
+                                  key={seatId}
+                                  type="button"
+                                  className={`booking-seat ${
+                                    isOccupied ? "occupied" : ""
+                                  } ${isSelected ? "selected" : ""}`}
+                                  disabled={isOccupied}
+                                  aria-label={`Seat ${seatId}, LKR ${getSeatPrice(
+                                    row
+                                  ).toLocaleString("en-LK")}${
+                                    isOccupied ? ", occupied" : ""
+                                  }`}
+                                  aria-pressed={isSelected}
+                                  onClick={() => toggleSeat(seatId)}
+                                >
+                                  {seatNumber}
+                                </button>
+                              );
+                            }
+                          )}
                         </div>
 
                         <span className="booking-row-label">{row}</span>
@@ -460,21 +544,36 @@ function BookingPage() {
                   </div>
 
                   <div className="booking-seat-legend">
-                    <span><i className="legend-seat available" /> Available</span>
-                    <span><i className="legend-seat selected" /> Selected</span>
-                    <span><i className="legend-seat occupied" /> Occupied</span>
+                    <span>
+                      <i className="legend-seat available" /> Available
+                    </span>
+                    <span>
+                      <i className="legend-seat selected" /> Selected
+                    </span>
+                    <span>
+                      <i className="legend-seat occupied" /> Occupied
+                    </span>
                   </div>
+
                   <div className="booking-price-guide">
                     <span>Seat prices</span>
-                    <span>Rows A–B <strong>LKR 1,200</strong></span>
-                    <span>Rows C–D <strong>LKR 900</strong></span>
-                    <span>Row E <strong>LKR 700</strong></span>
+                    <span>
+                      Rows A–B <strong>LKR 1,200</strong>
+                    </span>
+                    <span>
+                      Rows C–D <strong>LKR 900</strong>
+                    </span>
+                    <span>
+                      Row E <strong>LKR 700</strong>
+                    </span>
                   </div>
 
                   <div className="booking-smart-finder">
                     <div className="booking-section-heading">
                       <div>
-                        <p className="booking-card-label">CINEMATCH SMART FINDER</p>
+                        <p className="booking-card-label">
+                          CINEMATCH SMART FINDER
+                        </p>
                         <h2>Find seats for your group</h2>
                       </div>
                     </div>
@@ -545,64 +644,43 @@ function BookingPage() {
 
                     <div className="booking-total-price">
                       <span>Total</span>
-                      <strong>LKR {totalPrice.toLocaleString("en-LK")}</strong>
+                      <strong>
+                        LKR {totalPrice.toLocaleString("en-LK")}
+                      </strong>
                     </div>
+                  </div>
+
+                  <div className="booking-confirmation">
+                    <button
+                      type="button"
+                      className="booking-find-seats-button"
+                      disabled={selectedSeats.length === 0}
+                      onClick={() => setBookingConfirmed(true)}
+                    >
+                      Confirm demo booking
+                    </button>
+
+                    {bookingConfirmed && (
+                      <div
+                        className="booking-confirmation-result"
+                        role="status"
+                      >
+                        <h3>Demo booking confirmed</h3>
+                        <p>{movie.title}</p>
+                        <p>Showtime: {selectedShowtime}</p>
+                        <p>Seats: {selectedSeats.join(", ")}</p>
+                        <p>
+                          Total: LKR {totalPrice.toLocaleString("en-LK")}
+                        </p>
+                        <p>
+                          This is a project demo. No real seats have been
+                          reserved.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </section>
               )}
-              <div className="booking-section-heading">
-                <div>
-                  <p className="booking-card-label">PICK YOUR SESSION</p>
-                  <h2>Choose a showtime</h2>
-                </div>
-                <span className="booking-step">01 / 02</span>
-              </div>
-
-              <div className="booking-time-options">
-                {showtimes.map((showtime) => (
-                  <button
-                    key={showtime}
-                    type="button"
-                    className={`booking-time-option ${
-                      selectedShowtime === showtime ? "selected" : ""
-                    }`}
-                    aria-pressed={selectedShowtime === showtime}
-                    onClick={() => {
-                      setSelectedShowtime(showtime);
-                      setSelectedSeats([]);
-                      setSeatSuggestion([]);
-                      setFinderMessage("");
-                    }}
-                  >
-                    <span>{showtime}</span>
-                    <small>Standard session</small>
-                  </button>
-                ))}
-              </div>
-
-              <div className="booking-selection-panel" aria-live="polite">
-                {selectedShowtime ? (
-                  <>
-                    <div>
-                      <p className="booking-card-label">YOUR SESSION</p>
-                      <strong>{selectedShowtime}</strong>
-                      <p>{movie.title} · CineMatch Cinema</p>
-                    </div>
-                    <span className="booking-selection-check" aria-hidden="true">
-                      ✓
-                    </span>
-                  </>
-                ) : (
-                  <p>
-                    <span aria-hidden="true">◷</span>
-                    Select a showtime to prepare your seat selection.
-                  </p>
-                )}
-              </div>
-
-              <p className="booking-demo-note">
-                Sample showtimes for the project demo; real cinema schedules are not connected.
-              </p>
             </section>
           </div>
         </section>

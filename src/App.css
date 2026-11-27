@@ -1074,3 +1074,30 @@ button.view-all-link {
   color: #ff5967;
   white-space: nowrap;
 }
+
+.booking-confirmation {
+  margin-top: 20px;
+}
+
+.booking-confirmation-result {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid #3d654f;
+  border-radius: 10px;
+  background: #111a15;
+}
+
+.booking-confirmation-result h3 {
+  margin: 0 0 12px;
+  color: #9be3b2;
+}
+
+.booking-confirmation-result p {
+  margin: 8px 0;
+  color: #d4d4da;
+}
+
+.booking-confirmation button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
